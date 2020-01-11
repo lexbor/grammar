@@ -1,0 +1,75 @@
+[
+    /* Test count: 7 */
+    /* 1 */
+    {
+        "data": "<color>='abc'[<font without=\"all\">]*+?!{12345}#{1,<!-- dsfds -->2}",
+        "result": $RESULT{ ,12}
+            ELEMENT: <color>
+            EQUALS: =
+            STRING: "abc"
+            LEFT_BRACKET: [
+            ELEMENT: <font without="all">
+            RIGHT_BRACKET: ]
+            ASTERISK: *
+            PLUS: +
+            QUESTION: ?
+            EXCLAMATION: !
+            COUNT: {12345}
+            HASH: #
+            RANGE: {1,}
+            NUMBER: 2
+            DELIM: }
+            END_OF_FILE: END_OF_FILE
+        $RESULT
+    },
+    /* 2 */
+    {
+        "data": "a{12345}b",
+        "result": $RESULT{ ,12}
+            UNQUOTED: a
+            COUNT: {12345}
+            UNQUOTED: b
+            END_OF_FILE: END_OF_FILE
+        $RESULT
+    },
+    /* 3 */
+    {
+        "data": "abc-123_xyz",
+        "result": $RESULT{ ,12}
+            UNQUOTED: abc-123_xyz
+            END_OF_FILE: END_OF_FILE
+        $RESULT
+    },
+    /* 4 */
+    {
+        "data": "12345",
+        "result": $RESULT{ ,12}
+            NUMBER: 12345
+            END_OF_FILE: END_OF_FILE
+        $RESULT
+    },
+    /* 5 */
+    {
+        "data": "-12345",
+        "result": $RESULT{ ,12}
+            NUMBER: -12345
+            END_OF_FILE: END_OF_FILE
+        $RESULT
+    },
+    /* 6 */
+    {
+        "data": "12345.34",
+        "result": $RESULT{ ,12}
+            NUMBER: 12345.34
+            END_OF_FILE: END_OF_FILE
+        $RESULT
+    },
+    /* 7 */
+    {
+        "data": "-12345.34",
+        "result": $RESULT{ ,12}
+            NUMBER: -12345.34
+            END_OF_FILE: END_OF_FILE
+        $RESULT
+    },
+]

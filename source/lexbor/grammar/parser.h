@@ -53,7 +53,7 @@ LXB_API lxb_grammar_node_t *
 lxb_grammar_parser_process(lxb_grammar_parser_t *parser,
                            lxb_grammar_document_t *document);
 
-void
+LXB_API void
 lxb_grammar_parser_print_last_error(lxb_grammar_parser_t *parser);
 
 

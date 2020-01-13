@@ -11,11 +11,11 @@
 #include "lexbor/dom/interfaces/element.h"
 
 
-struct lxb_grammar_tree_context {
+typedef struct lxb_grammar_tree_context {
     lxb_grammar_tree_group_t **groups;
     lxb_grammar_tree_entry_t **ends;
 }
-typedef lxb_grammar_tree_context_t;
+lxb_grammar_tree_context_t;
 
 
 lxb_grammar_tree_t *

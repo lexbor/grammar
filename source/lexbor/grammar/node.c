@@ -204,6 +204,33 @@ lxb_grammar_node_serialize_combinator(lxb_grammar_node_t *group,
 }
 
 lxb_inline lxb_status_t
+lxb_grammar_node_serialize_combinator_wo_ws(lxb_grammar_node_t *group,
+                                     lxb_grammar_serialize_cb_f func, void *ctx)
+{
+    lxb_status_t status;
+
+    switch (group->combinator) {
+        case LXB_GRAMMAR_COMBINATOR_AND:
+            lxb_grammar_node_serialize_send("&&", 2, func, ctx);
+            break;
+
+        case LXB_GRAMMAR_COMBINATOR_OR:
+            lxb_grammar_node_serialize_send("||", 2, func, ctx);
+            break;
+
+        case LXB_GRAMMAR_COMBINATOR_ONE_OF:
+            lxb_grammar_node_serialize_send("|", 1, func, ctx);
+            break;
+
+        default:
+            lxb_grammar_node_serialize_send(" ", 1, func, ctx);
+            break;
+    }
+
+    return LXB_STATUS_OK;
+}
+
+lxb_inline lxb_status_t
 lxb_grammar_node_serialize_multiplier(lxb_grammar_node_t *node,
                                       lxb_grammar_serialize_cb_f func, void *ctx)
 {
@@ -421,6 +448,117 @@ lxb_grammar_node_serialize(lxb_grammar_node_t *node,
 
         default:
             return func((lxb_char_t *) "UNDEFINED", 9, ctx);
+    }
+
+    return LXB_STATUS_OK;
+}
+
+lxb_status_t
+lxb_grammar_node_serialize_ast(lxb_grammar_node_t *root,
+                               lxb_grammar_serialize_cb_f func, void *ctx)
+{
+    lxb_status_t status;
+    lxb_grammar_node_t *node;
+
+    size_t indent = 0;
+
+    node = root;
+
+    if (node->type == LXB_GRAMMAR_NODE_ROOT) {
+        node = node->first_child;
+    }
+
+    while (node != NULL) {
+
+        switch (node->type) {
+            case LXB_GRAMMAR_NODE_GROUP:
+                lxb_grammar_node_serialize_send_indent(indent, func, ctx);
+                lxb_grammar_node_serialize_send("<#GROUP>", 8, func, ctx);
+
+                status = lxb_grammar_node_serialize_multiplier(node, func, ctx);
+                if (status != LXB_STATUS_OK) {
+                    return status;
+                }
+
+                if (node->combinator) {
+                    lxb_grammar_node_serialize_send(", ", 2, func, ctx);
+
+                    status = lxb_grammar_node_serialize_combinator_wo_ws(node,
+                                                                     func, ctx);
+                    if (status != LXB_STATUS_OK) {
+                        return status;
+                    }
+                }
+
+                lxb_grammar_node_serialize_send("\n", 1, func, ctx);
+
+                indent++;
+
+                if (node->first_child != NULL) {
+                    node = node->first_child;
+                    continue;
+                }
+
+                break;
+
+            case LXB_GRAMMAR_NODE_DECLARATION:
+                lxb_grammar_node_serialize_send_indent(indent, func, ctx);
+
+                status = lxb_grammar_node_serialize(node, func, ctx);
+                if (status != LXB_STATUS_OK) {
+                    return status;
+                }
+
+                if (node->combinator) {
+                    lxb_grammar_node_serialize_send(", ", 2, func, ctx);
+
+                    status = lxb_grammar_node_serialize_combinator_wo_ws(node,
+                                                                     func, ctx);
+                    if (status != LXB_STATUS_OK) {
+                        return status;
+                    }
+                }
+
+                lxb_grammar_node_serialize_send("\n", 1, func, ctx);
+
+                node = node->first_child;
+
+                indent++;
+                continue;
+
+            default:
+                lxb_grammar_node_serialize_send_indent(indent, func, ctx);
+
+                status = lxb_grammar_node_serialize(node, func, ctx);
+                if (status != LXB_STATUS_OK) {
+                    return status;
+                }
+
+                status = lxb_grammar_node_serialize_multiplier(node, func, ctx);
+                if (status != LXB_STATUS_OK) {
+                    return status;
+                }
+
+                lxb_grammar_node_serialize_send("\n", 1, func, ctx);
+
+                break;
+        }
+
+        while (node->next == NULL) {
+            node = node->parent;
+
+            indent--;
+
+            if (node == NULL) {
+                return LXB_STATUS_ERROR;
+            }
+
+            if (node == root) {
+                return LXB_STATUS_OK;
+            }
+        }
+
+        node = node->next;
     }
 
     return LXB_STATUS_OK;

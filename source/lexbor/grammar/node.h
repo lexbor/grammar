@@ -105,6 +105,10 @@ LXB_API lxb_status_t
 lxb_grammar_node_serialize(lxb_grammar_node_t *node,
                            lxb_grammar_serialize_cb_f func, void *ctx);
 
+LXB_API lxb_status_t
+lxb_grammar_node_serialize_ast(lxb_grammar_node_t *root,
+                               lxb_grammar_serialize_cb_f func, void *ctx);
+
 
 #ifdef __cplusplus
 } /* extern "C" */
